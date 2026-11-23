@@ -1,0 +1,14 @@
+node_modules/
+dist/
+# 학생 개인정보 보호: 실제 출결 엑셀/테스트 자료는 절대 올리지 않습니다
+private-test/
+*.xlsx
+*.xls
+*.csv
+출력결과/
+.env*
+*.log
+public/pdf.worker.min.mjs
+.claude/
+/양식-*.pdf
+.github/
