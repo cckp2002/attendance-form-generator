@@ -34,7 +34,11 @@ npm run build    # dist/ 생성
 테스트 중 실제 엑셀 검증은 `private-test/1학년 1반 월별 출결 현황.xlsx`가 있을 때만 실행됩니다(없으면 건너뜀).
 시각 확인용 PNG: `$env:PDF_OUT="out"; npx vitest run tests/pdf.test.ts`
 
-### GitHub Pages 배포
+### 현재 배포 (gh-pages 브랜치 수동 배포)
+`npm run build` 후 `dist/` 내용을 `gh-pages` 브랜치로 올립니다 (`dist/.nojekyll` 포함). 코드 수정 후 다시 빌드해서 같은 방식으로 올리면 갱신됩니다.
+
+### GitHub Pages 자동 배포 (선택)
+아래 방식은 `.github/workflows/deploy.yml`(저장소에는 아직 없음)이 필요하며, 올리려면 GitHub 로그인에 `workflow` 권한이 필요합니다.
 1. GitHub에 새 저장소를 만들고 이 폴더를 push 합니다 (`main` 브랜치).
 2. 저장소 **Settings → Pages → Source**를 `GitHub Actions`로 설정합니다.
 3. push 하면 `.github/workflows/deploy.yml`이 테스트·빌드 후 자동 배포합니다. 상대 경로(`base: './'`)라 저장소 이름과 무관하게 동작합니다.
