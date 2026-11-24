@@ -20,6 +20,7 @@ export interface PdfAssets {
 }
 
 export interface PdfOptions {
+  /** 공통 작성일. 빈 문자열이면 "출결 다음 등교일"로 자동 설정 */
   issueDateISO: string;
   schoolName: string;
   teacherName?: string;
@@ -39,6 +40,19 @@ export const DEFAULT_SCHOOL = '웅촌중학교';
 const BODY = 12.9;
 const BLACK = rgb(0, 0, 0);
 const SPACE_EM = 0.32;
+
+/**
+ * 확인서에 쓸 날짜.
+ * 기본값: 작성일 = 마지막 출결일 다음 등교일(주말·공휴일 제외), 담임확인서 날짜 = 작성일 다음 등교일.
+ * 공통 작성일을 직접 지정했거나 학생별로 바꿨다면 그 값이 우선한다.
+ */
+export function resolveDates(c: Pick<Case, 'entries' | 'issueDate' | 'confirmDate'>, opts: Pick<PdfOptions, 'issueDateISO' | 'cal'>) {
+  const last = c.entries.map((e) => e.dateISO).sort().pop();
+  const auto = last ? opts.cal.nextSchoolDay(last) : opts.issueDateISO;
+  const issue = c.issueDate || opts.issueDateISO || auto;
+  const confirm = c.confirmDate || opts.cal.nextSchoolDay(issue);
+  return { issue, confirm };
+}
 
 export function studentIdText(c: Pick<Case, 'grade' | 'classNo' | 'number'>, fmt: 'text' | 'digits'): string {
   if (fmt === 'digits') return `${c.grade}${c.classNo.padStart(2, '0')}${c.number.padStart(2, '0')}`;
@@ -251,13 +265,16 @@ export class PdfEngine {
     if (teacher) textAlign(teacher, doc === 'absence' ? 434 : 428, spec.teacherY, 13.5, 'center');
 
     // 작성일 (연도는 원본 "2025년" 자리에, 월/일은 원본 "월"·"일" 앞 빈칸에)
-    const { y: yy, m: mm, d: dd } = parts(opts.issueDateISO);
-    for (const s of spec.dates) {
-      const yt = `${yy}년`;
+    const rd = resolveDates(c, opts);
+    spec.dates.forEach((s, i) => {
+      // 결석 신고서의 두 번째 날짜는 하단 "담임확인서" 날짜
+      const iso = i === 1 ? rd.confirm : rd.issue;
+      const { y: Y, m: M, d: D } = parts(iso);
+      const yt = `${Y}년`;
       text(yt, s.yearX + 39 - W(yt, BODY), s.y); // 원본 "2025년" 칸의 오른쪽 끝에 맞춤
-      textAlign(String(mm), (s.yearX + 39 + s.monthX) / 2, s.y, BODY, 'center');
-      textAlign(String(dd), (s.monthX + 13 + s.dayX) / 2, s.y, BODY, 'center');
-    }
+      textAlign(String(M), (s.yearX + 39 + s.monthX) / 2, s.y, BODY, 'center');
+      textAlign(String(D), (s.monthX + 13 + s.dayX) / 2, s.y, BODY, 'center');
+    });
 
     // 학교장 귀하 (학교명을 바꾼 경우에만 다시 씀)
     if (customSchool) {

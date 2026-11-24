@@ -64,6 +64,10 @@ export interface Case {
   reason: string;
   /** 결석 신고서 "첨부" 칸에 쓸 내용 (비우면 출력 화면의 공통 첨부 사용) */
   attachment?: string;
+  /** 이 확인서만 다르게 쓸 작성일 (YYYY-MM-DD, 없으면 공통 작성일) */
+  issueDate?: string;
+  /** 결석 신고서 하단 "담임확인서" 날짜 (없으면 작성일과 같음) */
+  confirmDate?: string;
   entries: DayEntry[];
   recordIds: string[];
   /** 자동 통합 여부 (기록 2건 이상) */

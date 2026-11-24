@@ -37,7 +37,7 @@ export default function App() {
   const [issues, setIssues] = useState<ParseIssue[]>([]);
   const [cases, setCases] = useState<Case[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [issueDate, setIssueDate] = useState(todayISO());
+  const [issueDate, setIssueDate] = useState(''); // '' = 출결 다음 등교일로 자동
   const [attachment, setAttachment] = useState(''); // 저장하지 않음 (출력할 때마다 입력)
   const [busy, setBusy] = useState(false);
   const [outBusy, setOutBusy] = useState('');
@@ -250,6 +250,9 @@ export default function App() {
             issueDate={issueDate} setIssueDate={setIssueDate} actions={actions}
             onBack={() => setStep(3)} onSettings={() => setSettingsTab('template')} schoolName={settings.schoolName}
             attachment={attachment} setAttachment={setAttachment}
+            onEditCase={setEditId}
+            setCaseConfirmDate={(id, iso) => setCases((cs) => cs.map((c) => (c.id === id ? { ...c, confirmDate: iso || undefined } : c)))}
+            setCaseIssueDate={(id, iso) => setCases((cs) => cs.map((c) => (c.id === id ? { ...c, issueDate: iso || undefined } : c)))}
             setCaseAttachment={(id, t) => setCases((cs) => cs.map((c) => (c.id === id ? { ...c, attachment: t || undefined } : c)))}
             teacherName={settings.teacherName ?? ''}
             setTeacherName={(t) => { const s = { ...settings, teacherName: t }; setSettings(s); saveSettings(s); }}
